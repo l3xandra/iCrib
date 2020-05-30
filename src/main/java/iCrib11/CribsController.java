@@ -37,67 +37,201 @@ import com.google.firebase.messaging.Notification;
 import com.google.gson.Gson;
 
 import Entities.Crib;
-import Entities.CribSimplified;
+import Entities.CribCreation;
 import Entities.User;
 import Firebase.FirestoreService;
 
 
 @Path("/cribs")
 public class CribsController {
-	
+
 	private FirestoreService firestore;
-	
+	private final static String TEMP_NOTIF_TITLE = "Room's temperature change!";
+	private final static String BABY_IS = "The baby is ";
+
+	private final static String TEMP_NOTIF_TEXT = "One of yout crib's room's temperature changed to ";
+
 	public CribsController() {
 		firestore = new FirestoreService();
 	}
-	
+
 	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/inCrib")
+	@Consumes("text/plain")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String temperatureChange() {
+	public Response isInCribUpdate(String c) {
+
+		//update crib at DB
+		Gson g = new Gson();
+		Crib crib = g.fromJson(c, Crib.class);
 		
-		// The topic name can be optionally prefixed with "/topics/".
-		String topic = "123";
+		System.out.println("111");
+		String result = firestore.updateIsInCrib(crib);
 
-		// See documentation on defining a message payload.
-		Message message = Message.builder().setNotification(new Notification("title", "text"))
-		    .putData("temperature", "850")
-		    .setTopic(topic)
-		    .build();
-
-		// Send a message to the devices subscribed to the provided topic.
-		String response;
-		try {
-			response = FirebaseMessaging.getInstance().send(message);
-			System.out.println("Successfully sent message: " );
+		System.out.println("222");
+		if(result != null) {
 			
-			return "Sent!";
-		} catch (FirebaseMessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("Error when sending message" );
-		}
-		// Response is a message ID string.
+			// See documentation on defining a message payload.
+			Message message = Message.builder().setNotification(new Notification(result, ""))
+					.putData("temperature", "850")
+					.setTopic(crib.getCode())
+					.build();
 	
-		return "Oops";
+			// Send a message to the devices subscribed to the provided topic.
+			String response;
+			try {
+				response = FirebaseMessaging.getInstance().send(message);
+				System.out.println("Successfully sent message: " );
+
+				return Response.status(Status.OK).build();
+			} catch (FirebaseMessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error when sending message" );
+			}
+			// Response is a message ID string.
+
+		}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
 	
+	@POST
+	@Path("/temperature")
+	@Consumes("text/plain")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response temperatureUpdate(String c) {
+
+		//update crib at DB
+		Gson g = new Gson();
+		Crib crib = g.fromJson(c, Crib.class);
+		
+		System.out.println("111");
+		boolean result = firestore.updateTemperature(crib);
+
+		System.out.println("222");
+		if(result) {
+			
+			// See documentation on defining a message payload.
+			Message message = Message.builder().setNotification(new Notification(TEMP_NOTIF_TITLE, TEMP_NOTIF_TEXT + crib.getRoomTemperature() + " ºC."))
+					.putData("temperature", "850")
+					.setTopic(crib.getCode())
+					.build();
+	
+			// Send a message to the devices subscribed to the provided topic.
+			String response;
+			try {
+				response = FirebaseMessaging.getInstance().send(message);
+				System.out.println("Successfully sent message: " );
+
+				return Response.status(Status.OK).build();
+			} catch (FirebaseMessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error when sending message" );
+			}
+			// Response is a message ID string.
+
+		}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}
+	
+	@POST
+	@Path("/movement")
+	@Consumes("text/plain")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response movementUpdate(String c) {
+
+		//update crib at DB
+		Gson g = new Gson();
+		Crib crib = g.fromJson(c, Crib.class);
+		
+		System.out.println("111");
+		String result = firestore.updateMovement(crib);
+
+		System.out.println("222");
+		if(result != null) {
+			
+			// See documentation on defining a message payload.
+			Message message = Message.builder().setNotification(new Notification(BABY_IS + result, ""))
+					.putData("code", crib.getCode())
+					.setTopic(crib.getCode())
+					.build();
+	
+			// Send a message to the devices subscribed to the provided topic.
+			String response;
+			try {
+				response = FirebaseMessaging.getInstance().send(message);
+				System.out.println("Successfully sent message: " );
+
+				return Response.status(Status.OK).build();
+			} catch (FirebaseMessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error when sending message" );
+			}
+			// Response is a message ID string.
+
+		}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}
+	
+	
+	@POST
+	@Path("/sound")
+	@Consumes("text/plain")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response soundUpdate(String c) {
+
+		//update crib at DB
+		Gson g = new Gson();
+		Crib crib = g.fromJson(c, Crib.class);
+		
+		System.out.println("111");
+		String result = firestore.updateSound(crib);
+
+		System.out.println("222");
+		if(result != null) {
+			
+			// See documentation on defining a message payload.
+			Message message = Message.builder().setNotification(new Notification(BABY_IS + result, ""))
+					.putData("code", crib.getCode())
+					.setTopic(crib.getCode())
+					.build();
+	
+			// Send a message to the devices subscribed to the provided topic.
+			String response;
+			try {
+				response = FirebaseMessaging.getInstance().send(message);
+				System.out.println("Successfully sent message: " );
+
+				return Response.status(Status.OK).build();
+			} catch (FirebaseMessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error when sending message" );
+			}
+			// Response is a message ID string.
+
+		}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}
+
 
 	@GET
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCrib(@PathParam("id")String id) {
-		
-		System.out.println("AQUIIIIIIIIIIIII\n");
+
+		System.out.println("CRIIIB\n");
 		Crib crib = firestore.getCrib(id);
 		ObjectMapper mapper = new ObjectMapper();
-	      //Converting the Object to JSONString
-	    try {
+		//Converting the Object to JSONString
+		try {
 			String jsonString = mapper.writeValueAsString(crib);
 
-			System.out.println("AQUIIIIIIIIIIIII1\n");
+			System.out.println("CRIIIIB1\n");
 			if(crib != null) {
-				System.out.println("AQUIIIIIIIIIIIII2\n");
+				System.out.println("CRIBBB2\n");
 				return Response.status(Status.OK).entity(jsonString).type(MediaType.APPLICATION_JSON).build();
 			}
 			else {
@@ -111,33 +245,170 @@ public class CribsController {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();	
 		}
 	}
-	
+
 	@GET
 	@Path("/cribs")
+	@Consumes("text/plain")
 	@Produces("text/plain")
 	public Response getCribs(String u) {
-		
+
 		System.out.println("AQUIIIIIIIIIIIII\n");
 		Gson g = new Gson();
 		User user = g.fromJson(u, User.class);
-		
-		 Map<String, String> cribs = firestore.getCribs(user);
-		
-			System.out.println("AQUIIIIIIIIIIIII1\n");
-			if(cribs != null) {
 
-				System.out.println("AQUIIIIIIIIIIIII1222\n");
-				
-				String cribsJson = g.toJson(cribs);
-				
-				System.out.println("AQUIIIIIIIIIIIII2\n");
-				return Response.status(Status.OK).entity(cribsJson).type(MediaType.APPLICATION_JSON).build();
+		System.out.println(user.getEmail() + "XXXXXXXXX\n");
+		Map<String, String> cribs = firestore.getCribs(user);
+
+		System.out.println("AQUIIIIIIIIIIIII1\n");
+		if(cribs != null) {
+
+			System.out.println("AQUIIIIIIIIIIIII1222\n");
+
+			String cribsJson = g.toJson(cribs);
+
+			System.out.println("AQUIIIIIIIIIIIII2\n");
+			return Response.status(Status.OK).entity(cribsJson).type(MediaType.APPLICATION_JSON).build();
+		}
+		else {
+			System.out.println("AQUIIIIIIIIIIIII3\n");
+			return Response.status(Status.NOT_FOUND).build();
+		}
+
+	}
+
+
+	@POST
+	@Path("/add")
+	@Consumes("text/plain")
+	@Produces("text/plain")
+	public Response addCrib(String c) {
+
+		System.out.println("AQUIIIIIIIIIIIII\n");
+
+		Gson g = new Gson();
+		CribCreation cribCreation = g.fromJson(c, CribCreation.class);
+
+		System.out.println("AQUIIIIIIIIIIIII2\n");
+		Crib crib = firestore.getCrib(cribCreation.getCode());
+
+		System.out.println("AQUIIIIIIIIIIIII3\n");
+		//verify if crib exists
+		if(crib != null) {
+
+			System.out.println("AQUIIIIIIIIIIIII4\n");
+			crib = firestore.addCrib(cribCreation.getEmail(), cribCreation.getCode(), crib, cribCreation.getName());
+
+			System.out.println("AQUIIIIIIIIIIIII5\n");
+			if(crib != null) {
+
+				ObjectMapper mapper = new ObjectMapper();
+				//Converting the Object to JSONString
+				try {
+					String jsonString = mapper.writeValueAsString(crib);
+
+					System.out.println("AQUIIIIIIIIIIIII6\n");
+					return Response.status(Status.OK).entity(jsonString).type(MediaType.APPLICATION_JSON).build();
+
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					System.out.println("AQUIIIIIIIIIIIII7\n");
+					e.printStackTrace();
+					return Response.status(Status.INTERNAL_SERVER_ERROR).build();	
+				}
+
 			}
 			else {
-				System.out.println("AQUIIIIIIIIIIIII3\n");
-				return Response.status(Status.NOT_FOUND).build();
+
+				System.out.println("AQUIIIIIIIIIIIII8\n");
+				return Response.status(Status.CONFLICT).build();
 			}
-		
+		}
+
+		else {
+
+			System.out.println("AQUIIIIIIIIIIIII9\n");
+			return Response.status(Status.NOT_FOUND).build();
+		}
+
+
+	}
+
+	@POST
+	@Path("/update")
+	@Consumes("text/plain")
+	@Produces("text/plain")
+	public Response updateCribName(String c) {
+
+		System.out.println("AQUIIIIIIIIIIIII\n");
+
+		Gson g = new Gson();
+		CribCreation crib = g.fromJson(c, CribCreation.class);
+
+		System.out.println("AQUIIIIIIIIIIIII2\n");
+
+		CribCreation cribResult = firestore.updateCribName(crib);
+
+		System.out.println("AQUIIIIIIIIIIIII5\n");
+		if(cribResult != null) {
+
+			ObjectMapper mapper = new ObjectMapper();
+			//Converting the Object to JSONString
+			try {
+				String jsonString = mapper.writeValueAsString(cribResult);
+
+				System.out.println("AQUIIIIIIIIIIIII6\n");
+				return Response.status(Status.OK).entity(jsonString).type(MediaType.APPLICATION_JSON).build();
+
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				System.out.println("AQUIIIIIIIIIIIII7\n");
+				e.printStackTrace();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();	
+			}
+
+		}
+		else {
+
+			System.out.println("AQUIIIIIIIIIIIII8\n");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+
+
+	}
+	
+	@POST
+	@Path("/delete")
+	@Consumes("text/plain")
+	@Produces("text/plain")
+	public Response deleteCrib(String c) {
+
+		System.out.println(c+"\n");
+
+		Gson g = new Gson();
+		CribCreation crib = g.fromJson(c, CribCreation.class);
+
+		System.out.println("AQUIIIIIIIIIIIII2\n");
+
+		boolean cribResult = firestore.deleteCrib(crib);
+
+		System.out.println("AQUIIIIIIIIIIIII5\n");
+		if(cribResult) {
+
+
+				System.out.println("AQUIIIIIIIIIIIII6\n");
+				return Response.status(Status.OK).build();
+
+
+		}
+		else {
+
+			System.out.println("AQUIIIIIIIIIIIII8\n");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+
+
 	}
 
 }
