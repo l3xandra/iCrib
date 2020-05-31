@@ -71,9 +71,11 @@ public class CribsController {
 		System.out.println("222");
 		if(result != null) {
 			
+
+			System.out.println("inside");
 			// See documentation on defining a message payload.
 			Message message = Message.builder().setNotification(new Notification(result, ""))
-					.putData("temperature", "850")
+					.putData("code", crib.getCode())
 					.setTopic(crib.getCode())
 					.build();
 	
@@ -89,6 +91,89 @@ public class CribsController {
 				e.printStackTrace();
 				System.out.println("Error when sending message" );
 			}
+			// Response is a message ID string.
+
+		}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}
+	
+	@POST
+	@Path("/rocking")
+	@Consumes("text/plain")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response cribRockingUpdate(String c) {
+
+		//update crib at DB
+		Gson g = new Gson();
+		Crib crib = g.fromJson(c, Crib.class);
+		
+		System.out.println("111");
+		boolean result = firestore.updateCribRocking(crib);
+
+		System.out.println("222");
+		if(result) {
+			Message message = Message.builder().setNotification(new Notification("rocking", ""))
+					.putData("value", Float.toString(crib.getCribRocking()))
+					.setTopic("simulator"+crib.getCode())
+					.build();
+	
+			// Send a message to the devices subscribed to the provided topic.
+			String response;
+			try {
+				response = FirebaseMessaging.getInstance().send(message);
+				System.out.println("Successfully sent message: " );
+
+				return Response.status(Status.OK).build();
+			} catch (FirebaseMessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error when sending message" );
+			}
+			System.out.println("333");
+				return Response.status(Status.OK).build();
+			
+			// Response is a message ID string.
+
+		}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}
+	
+	@POST
+	@Path("/toy")
+	@Consumes("text/plain")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response toyMovementUpdate(String c) {
+
+		//update crib at DB
+		Gson g = new Gson();
+		Crib crib = g.fromJson(c, Crib.class);
+		
+		System.out.println("111");
+		boolean result = firestore.updateToyMovement(crib);
+
+		System.out.println("222");
+		if(result) {
+			Message message = Message.builder().setNotification(new Notification("toy", ""))
+					.putData("value", Float.toString(crib.getToyMovement()))
+					.setTopic("simulator"+crib.getCode())
+					.build();
+	
+			// Send a message to the devices subscribed to the provided topic.
+			String response;
+			try {
+				response = FirebaseMessaging.getInstance().send(message);
+				System.out.println("Successfully sent message: " );
+
+				return Response.status(Status.OK).build();
+			} catch (FirebaseMessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error when sending message" );
+			}
+
+			System.out.println("333");
+				return Response.status(Status.OK).build();
+			
 			// Response is a message ID string.
 
 		}
@@ -113,7 +198,6 @@ public class CribsController {
 			
 			// See documentation on defining a message payload.
 			Message message = Message.builder().setNotification(new Notification(TEMP_NOTIF_TITLE, TEMP_NOTIF_TEXT + crib.getRoomTemperature() + " ºC."))
-					.putData("temperature", "850")
 					.setTopic(crib.getCode())
 					.build();
 	
@@ -150,7 +234,8 @@ public class CribsController {
 
 		System.out.println("222");
 		if(result != null) {
-			
+
+			System.out.println("333");
 			// See documentation on defining a message payload.
 			Message message = Message.builder().setNotification(new Notification(BABY_IS + result, ""))
 					.putData("code", crib.getCode())
@@ -296,6 +381,9 @@ public class CribsController {
 		if(crib != null) {
 
 			System.out.println("AQUIIIIIIIIIIIII4\n");
+			
+			
+			
 			crib = firestore.addCrib(cribCreation.getEmail(), cribCreation.getCode(), crib, cribCreation.getName());
 
 			System.out.println("AQUIIIIIIIIIIIII5\n");

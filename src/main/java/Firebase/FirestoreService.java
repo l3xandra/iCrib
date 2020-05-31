@@ -316,7 +316,7 @@ public class FirestoreService {
 		
 	}
 	
-	public boolean login(User user) {
+	public String login(User user) {
 
 		String token = UUID.randomUUID().toString();
 		
@@ -329,9 +329,55 @@ public class FirestoreService {
 		// Add a new document (asynchronously) in collection "cities" with id "LA"
 		ApiFuture<WriteResult> future = dbFirestore.collection("users").document(user.getEmail()).set(docData);
 		
-		return true;
+		return token;
 		
 	}
+	
+	public boolean logout(User user) {
+
+		String token = UUID.randomUUID().toString();
+		
+		DocumentReference documentReference = dbFirestore.collection("users").document(user.getEmail());
+		ApiFuture<DocumentSnapshot> future = documentReference.get();
+		
+		DocumentSnapshot document;
+		try {
+			document = future.get();
+			
+			if(document.exists()) {
+
+				WriteResult result;
+
+				System.out.println("9999");
+				
+				ApiFuture<WriteResult> future2 = documentReference.update("token", token);
+
+				System.out.println("3333");
+					// ...
+				result = future2.get();
+				System.out.println("Write result: " + result);
+					
+				return true;
+			}
+			else {
+				return false;
+			}			
+		
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			
+			e.printStackTrace();
+			return false;
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+			
+		
+	}
+	
+	
 	
 	public boolean updateTemperature(Crib newCrib) {
 		
@@ -470,11 +516,11 @@ public String updateIsInCrib(Crib newCrib) {
 		String update;
 		
 		if(newCrib.getBabyMovement() > 0) {
-			update = "is moving!";
+			update = "moving!";
 			newCrib.setBabyMovement(2);
 		}
 		else {
-			update = "is still.";
+			update = "still.";
 			newCrib.setBabyMovement(1);
 		}
 		
@@ -498,26 +544,19 @@ public String updateIsInCrib(Crib newCrib) {
 
 				
 				System.out.println("9999");
-				if(newCrib.getBabyMovement() != crib.getLastBabyMovement()) {
-
-					System.out.println(newCrib.getBabyMovement() + "   " +  crib.getLastBabyMovement());
-					
+				if(newCrib.getBabyMovement() != crib.getBabyMovement()) {
+						
 					updated = update;
-					
-					ApiFuture<WriteResult> future2 = documentReference.update("lastBabyMovement", newCrib.getBabyMovement());
 
-					System.out.println("2222");
+						ApiFuture<WriteResult> future2 = documentReference.update("babyMovement", newCrib.getBabyMovement());
+
+						System.out.println("3333");
 					// ...
-					result = future2.get();
-		
+						result = future2.get();
+						System.out.println("Write result: " + result);
 				}
 				
-				ApiFuture<WriteResult> future2 = documentReference.update("babyMovement", newCrib.getBabyMovement());
-
-				System.out.println("3333");
-					// ...
-				result = future2.get();
-				System.out.println("Write result: " + result);
+				
 					
 				return updated;
 			}
@@ -584,7 +623,7 @@ public String updateIsInCrib(Crib newCrib) {
 
 				
 				System.out.println("9999");
-				if(newCrib.getBabySound() != crib.getLastBabySound()) {
+				if(newCrib.getBabySound() != crib.getBabySound()) {
 
 
 					updated = update;
@@ -623,4 +662,97 @@ public String updateIsInCrib(Crib newCrib) {
 			
 			
 	}
+	
+	public boolean updateCribRocking(Crib newCrib) {
+		
+		DocumentReference documentReference = dbFirestore.collection("cribs").document(newCrib.getCode());
+		ApiFuture<DocumentSnapshot> future = documentReference.get();
+		
+		DocumentSnapshot document;
+		try {
+			document = future.get();
+		
+			Crib crib = null;
+			
+			if(document.exists()) {
+
+				System.out.println("7777");
+				crib = document.toObject(Crib.class);
+			
+				System.out.println("8888");
+				WriteResult result;
+
+				System.out.println("9999");
+				
+				ApiFuture<WriteResult> future2 = documentReference.update("cribRocking", newCrib.getCribRocking());
+
+				System.out.println("2222");
+					// ...
+				result = future2.get();
+
+				return true;
+			}
+			else {
+				return false;
+			}			
+		
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			
+			e.printStackTrace();
+			return false;
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}	
+	}
+	
+	public boolean updateToyMovement(Crib newCrib) {
+		
+		DocumentReference documentReference = dbFirestore.collection("cribs").document(newCrib.getCode());
+		ApiFuture<DocumentSnapshot> future = documentReference.get();
+		
+		DocumentSnapshot document;
+		try {
+			document = future.get();
+		
+			Crib crib = null;
+			
+			if(document.exists()) {
+
+				System.out.println("7777");
+				crib = document.toObject(Crib.class);
+			
+				System.out.println("8888");
+				WriteResult result;
+
+				System.out.println("9999");
+				
+				ApiFuture<WriteResult> future2 = documentReference.update("toyMovement", newCrib.getToyMovement());
+
+				System.out.println("2222");
+					// ...
+				result = future2.get();
+
+				return true;
+			}
+			else {
+				return false;
+			}			
+		
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			
+			e.printStackTrace();
+			return false;
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+			
+			
+	}
+	
 }
